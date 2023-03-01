@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Record Canvas</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        background-color: #cccccc;
+      }
+      img {
+        display: none;
+      }
+      canvas {
+        background-color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <img src="skill.png" />
+  </body>
+  <script>
+    function record(canvas, time) {
+      var recordedChunks = [];
+      return new Promise(function (res, rej) {
+        var stream = canvas.captureStream(30);
+        mediaRecorder = new MediaRecorder(stream, {
+          mimeType: "video/webm; codecs=vp9",
+        });
+        //ondataavailable will fire in interval of `time || 4000 ms`
+        mediaRecorder.start();
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, time);
+        mediaRecorder.ondataavailable = function (event) {
+          recordedChunks.push(event.data);
+          var blob = new Blob(recordedChunks, { type: "video/webm" });
+          var url = URL.createObjectURL(blob);
+          res(url);
+        };
+      });
+    }
+
+    const cnv = document.getElementsByTagName("canvas")[0];
+    const ctx = cnv.getContext("2d");
+    cnv.width = 600;
+    cnv.height = 600;
+    const img = document.getElementsByTagName("img")[0];
+    img.onload = () => {
+      animate();
+      const recording = record(cnv, 400);
+      // download
+      var link$ = document.createElement("a");
+      link$.setAttribute("download", "recordingVideo");
+      recording.then((url) => {
+        link$.setAttribute("href", url);
+        link$.click();
+      });
+    };
+    function animate() {
+      let c = 0;
+      ctx.fillStyle = "#0000ff";
+      setInterval(() => {
+        ctx.fillRect(c, 0, 50, 50); //x, y, width, height
+        ctx.drawImage(img, 0, 0);
+        c += 50;
+      }, 100);
+    }
+  </script>
+</html>
