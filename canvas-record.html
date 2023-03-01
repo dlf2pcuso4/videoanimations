@@ -9,25 +9,37 @@
         margin: 0;
       }
       body {
-        background-color: #cccccc;
+        background-color: #bbbbbb;
       }
       img {
         display: none;
       }
       canvas {
-        background-color: #ffffff;
+        background-color: #111111;
       }
     </style>
   </head>
   <body>
     <canvas></canvas>
-    <img src="skill.png" />
+    <button onclick="go()">Record</button>
+    <img id="statbg" src="topf2pstat.png" />
+    <img id="card" src="https://dlf2p.com/images/cards/45002991.jpg" />
+    <img id="logo" src="logo.png" />
+    <img id="bg" src="bg.jpg" />
   </body>
   <script>
+    //variables
+    const screenWidth = 1280;
+    const screenHeight = 720;
+    const fps = 30;
+
+    const title = "CRUSADIA";
+    const desc = "Raider's Requiem";
+
     function record(canvas, time) {
       var recordedChunks = [];
       return new Promise(function (res, rej) {
-        var stream = canvas.captureStream(30);
+        var stream = canvas.captureStream(fps);
         mediaRecorder = new MediaRecorder(stream, {
           mimeType: "video/webm; codecs=vp9",
         });
@@ -44,31 +56,84 @@
         };
       });
     }
-
     const cnv = document.getElementsByTagName("canvas")[0];
     const ctx = cnv.getContext("2d");
-    cnv.width = 600;
-    cnv.height = 600;
-    const img = document.getElementsByTagName("img")[0];
-    img.onload = () => {
+    cnv.width = screenWidth;
+    cnv.height = screenHeight;
+    function go() {
       animate();
-      const recording = record(cnv, 400);
-      // download
-      var link$ = document.createElement("a");
-      link$.setAttribute("download", "recordingVideo");
-      recording.then((url) => {
-        link$.setAttribute("href", url);
-        link$.click();
-      });
-    };
+      if (!window.location.href.includes("Desktop")) {
+        const recording = record(cnv, 400);
+        // download
+        var link$ = document.createElement("a");
+        link$.setAttribute("download", "intro");
+        recording.then((url) => {
+          link$.setAttribute("href", url);
+          link$.click();
+        });
+      }
+    }
+
+    //animation function
     function animate() {
-      let c = 0;
-      ctx.fillStyle = "#0000ff";
+      const card = document.getElementById("card");
+      const logo = document.getElementById("logo");
+      const statbg = document.getElementById("statbg");
+      const bg = document.getElementById("bg");
+      const statx = 300;
+      const staty = 450;
+      const statscale = 0.82;
+      const data = [5, 4, 5, 3, 5, 2];
+      data.forEach((d, i, a) => (a[i] = d * statscale));
+      const dvar = [0, 0, 0, 0, 0, 0];
+      let count = 0;
+      let enter = 0;
+      let fade = 0;
       setInterval(() => {
-        ctx.fillRect(c, 0, 50, 50); //x, y, width, height
-        ctx.drawImage(img, 0, 0);
-        c += 50;
-      }, 100);
+        count++;
+        ctx.clearRect(0, 0, cnv.width, cnv.height);
+        //bg
+        ctx.globalAlpha = 1;
+        ctx.drawImage(bg, 0, 0);
+        //text animation
+        ctx.globalAlpha = Math.min(count / 10, 1);
+        ctx.font = "bold 40px Times New Roman";
+        ctx.fillStyle = "white";
+        ctx.fillText("[DECK NAME]", 70, 100);
+        ctx.font = "bold 60px Times New Roman";
+        ctx.fillText(title, 70, 160);
+        ctx.font = "20px Bahnschrift";
+        ctx.fillText("[BOXES]", 75, 230);
+        ctx.font = "25px Bahnschrift";
+        ctx.fillText(desc, 75, 270);
+        //card animation
+        ctx.globalAlpha = Math.min(count / 15, 1);
+        enter = 600 * Math.tanh(0.1 * count);
+        ctx.drawImage(card, cnv.width - enter, 100);
+        //logo animation
+        ctx.globalAlpha = 1;
+        ctx.drawImage(logo, 1030, 5, 250, 173);
+        //stat animation
+        if (count <= 30) {
+          ctx.globalAlpha = Math.min(count / 30, 1);
+          ctx.drawImage(statbg, statx - 257, staty - 205);
+        }
+        if (count > 30) {
+          fade = Math.tanh(0.1 * (count - 30));
+          dvar.forEach((d, i, a) => (a[i] = data[i] * fade));
+          ctx.drawImage(statbg, statx - 257, staty - 205);
+          ctx.fillStyle = "#380176e0";
+          ctx.beginPath(); // pt: statx staty
+          ctx.moveTo(statx, staty - 33.5 * dvar[0]);
+          ctx.lineTo(statx + 28.7 * dvar[1], staty - 16.8 * dvar[1]);
+          ctx.lineTo(statx + 28.7 * dvar[2], staty + 17.6 * dvar[2]);
+          ctx.lineTo(statx, staty + 33.5 * dvar[3]);
+          ctx.lineTo(statx - 28.7 * dvar[4], staty + 17.6 * dvar[4]);
+          ctx.lineTo(statx - 28.7 * dvar[5], staty - 16.8 * dvar[5]);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }, 33);
     }
   </script>
 </html>
