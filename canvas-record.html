@@ -42,7 +42,7 @@
       return new Promise(function (res, rej) {
         var stream = canvas.captureStream(fps);
         mediaRecorder = new MediaRecorder(stream, {
-          mimeType: "video/webm; codecs=vp9",
+          mimeType: "video/webm; codecs=h264",
         });
         //ondataavailable will fire in interval of `time || 4000 ms`
         mediaRecorder.start();
@@ -51,7 +51,7 @@
         }, time);
         mediaRecorder.ondataavailable = function (event) {
           recordedChunks.push(event.data);
-          var blob = new Blob(recordedChunks, { type: "video/webm" });
+          var blob = new Blob(recordedChunks, { type: "video/mp4" });
           var url = URL.createObjectURL(blob);
           res(url);
         };
