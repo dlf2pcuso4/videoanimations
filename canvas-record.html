@@ -34,8 +34,9 @@
     const fps = 30;
     const duration = 3; //sec
 
-    const title = "CRUSADIA";
+    const title = "DUAL AVATAR";
     const desc = "Raider's Requiem";
+    const data = [3, 5, 4, 3, 4, 2];
 
     function record(canvas, time) {
       var recordedChunks = [];
@@ -84,7 +85,6 @@
       const statx = 300;
       const staty = 450;
       const statscale = 0.82;
-      const data = [5, 4, 5, 3, 5, 2];
       data.forEach((d, i, a) => (a[i] = d * statscale));
       const dvar = [0, 0, 0, 0, 0, 0];
       let count = 0;
